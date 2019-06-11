@@ -9,32 +9,33 @@ import string
 import os.path
 
 stack_array = []
+depth = 0
+ascii_tree = ''
+
 
 # Main function
 def main():
     global stack_array
     # At the moment I'm using a hardcoded json file to test the functionality
     query_file = "games.nulls"  # name of said file
-    stack_array.append(query_file)
+    # stack_array.append(query_file)
+    stack_array.append((query_file, depth))
     # if check_if_exists(query_file):
     #     get_table_dependency(query_file)
     iterate_req()
 
 
-# Function to check if the file exists
-def check_if_exists(query_file):
-    try:
-        with open(query_file, 'r') as fh:
-            return True
-    except FileNotFoundError:
-        return False
-
 
 # Heavy work function to retieve the depencies
-def get_table_dependency(query_file):
+def get_table_dependency(query_tuple):
     global stack_array
-    if (os.path.exists(query_file)):
-        with open(query_file) as json_file:
+    global depth
+    file_name = query_tuple[0]+'.json'
+
+    if (os.path.exists(file_name)):
+        depth = depth + 1
+        with open(file_name) as json_file:
+
             data = json.load(json_file)
             table_names = data['query']['L'][0]['M']['from']['S']
             # table_names = table_names.split(table_names," on ")[]
@@ -47,20 +48,32 @@ def get_table_dependency(query_file):
                     #     stack_array.append(el.replace('.json', ''))
                     # else:
                     #     stack_array.pop(el)
-                    stack_array.append(el.replace('.json', ''))
+
+                    # stack_array.append(el.replace('.json', ''))
+                    stack_array.append((el.replace('.json', ''), depth))
+
+
         # if check_if_exists(stack_array[-1] + ".json"):
         #     get_table_dependency(stack_array[-1] + ".json")
         # print(stack_array)
+
     else:
         print("leaf node")
+        depth = depth - 1
+        # print(depth)
+
 
 
 
 def iterate_req():
+    global ascii_tree
     while(len(stack_array) != 0):
         element = stack_array.pop()
+
+        print("===================")
         print(element)
-        get_table_dependency(element + '.json')
+        print("===================")
+        get_table_dependency(element)
 
 
 main()
